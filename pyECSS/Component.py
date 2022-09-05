@@ -505,12 +505,51 @@ class BasicTransformDecorator(ComponentDecorator):
     :param ComponentDecorator: [description]
     :type ComponentDecorator: [type]
     """
-    def init(self):
+    def __init__(self,name=None, type=None, id=None, trs=None):
         """
         example of a decorator
         """
-        self.component.init()
+        super().__init__(name, type, id)
+        
+        if (trs is None):
+            self._trs = util.identity()
+        else:
+            self._trs = trs
+        print("test-")
+        self._l2world = util.identity()
+        self._l2cam = util.identity()
+        self._parent = self
+        self._children = []
         #call any extra methods before or after
+        print("New component has been initialized")
+        
+    
+    @property #trs
+    def trs(self):
+        """ Get Component's transform: translation, rotation ,scale """
+        return self._trs
+    @trs.setter
+    def trs(self, value):
+        self._trs = value
+        
+    def rotate(self):
+        # First get rotation matrix from trs. Divide by scale
+        rotationMatrix = self.trs.copy()
+        rotationMatrix[:][0] /= self.scale[0]
+        rotationMatrix[:][1] /= self.scale[1]
+        rotationMatrix[:][2] /= self.scale[2]
+        # Now, extract euler angles from rotation matrix
+        x = atan2(rotationMatrix[1][2], rotationMatrix[2][2])
+        y = 0
+        z = 0
+        return [x, y, z]
+    
+    @property #scale vector
+    def scale(self):
+        x = self.trs[0, 0];
+        y = self.trs[1, 1];
+        z = self.trs[2, 2];
+        return [x, y, z];
     
     def accept(self, system: pyECSS.System, event = None):
         pass # we want the decorator first to accept the visitor and only if needed the wrappe to accept it too
