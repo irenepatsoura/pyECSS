@@ -18,13 +18,16 @@ Based on the Composite and Iterator design patterns
 
 from __future__         import annotations
 from abc                import ABC, abstractmethod
+from gettext import translation
 from math import atan2
 from typing             import List
 from collections.abc    import Iterable, Iterator
+from numbers import Number
 
 import pyECSS.System
 import uuid  
 import pyECSS.utilities as util
+import numpy as np
 
 
 class Component(ABC, Iterable):
@@ -498,7 +501,7 @@ class RenderMesh(Component):
         return CompNullIterator(self) 
     
     
-class BasicTransformDecorator(ComponentDecorator):
+class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
     """An example of a concrete Component Decorator that wraps the component (BasicTransform) 
         and adds extra layered functionality 
 
@@ -521,8 +524,22 @@ class BasicTransformDecorator(ComponentDecorator):
         self._parent = self
         self._children = []
         #call any extra methods before or after
+        
+        
         print("New component has been initialized")
         
+    @property #translation vector
+    def translation(self):
+        return self.trs[:3,3];
+    
+    def translate(self, tr_v):
+        coor = self.translation
+        new_x = tr_v[0] + coor[0]
+        new_y = tr_v[1] + coor[1]
+        new_z = tr_v[2] + coor[2]
+        
+        new_coor = [new_x , new_y, new_z]
+        return new_coor
     
     @property #trs
     def trs(self):
@@ -532,17 +549,45 @@ class BasicTransformDecorator(ComponentDecorator):
     def trs(self, value):
         self._trs = value
         
+    
+    def quaternion(self, x=0.0, y=0.0, z=0.0, w=1.0, q=None):
+        if q is None:
+            for i in [x, y, z, w]:
+                assert isinstance(i, Number), "x, y, z, w should be scalars."
+            q = np.array([x, y, z, w]).T
+        elif isinstance(q, np.ndarray):
+            q = q.copy()
+        else:
+            print("This is not supported. Type of q is {}".format(type(q)))
+            assert False
+        return q
+        
     def rotate(self):
-        # First get rotation matrix from trs. Divide by scale
-        rotationMatrix = self.trs.copy()
-        rotationMatrix[:][0] /= self.scale[0]
-        rotationMatrix[:][1] /= self.scale[1]
-        rotationMatrix[:][2] /= self.scale[2]
-        # Now, extract euler angles from rotation matrix
-        x = atan2(rotationMatrix[1][2], rotationMatrix[2][2])
-        y = 0
-        z = 0
-        return [x, y, z]
+        
+        rotation_matrix = self.trs.copy()
+    
+        w = np.sqrt(
+            1.0 + rotation_matrix[0, 0] + rotation_matrix[1, 1] + rotation_matrix[2, 2]) / 2
+        w4 = 4.0 * w
+        x = (rotation_matrix[2, 1] - rotation_matrix[1, 2]) / w4
+        y = (rotation_matrix[0, 2] - rotation_matrix[2, 0]) / w4
+        z = (rotation_matrix[1, 0] - rotation_matrix[0, 1]) / w4
+        return self.quaternion(x, y, z, w)
+    
+    def rotate_vector(self, vector):
+    
+        q = self.rotate()
+        vector_rotated = np.zeros(3)
+        vector_rotated[0] = ((1 - 2 * q[1]**2 - 2 * q[2]**2) * vector[0] +
+                            2 * (q[0] * q[1] - q[2] * q[3]) * vector[1] +
+                            2 * (q[0] * q[2] + q[1] * q[3]) * vector[2])
+        vector_rotated[1] = (2 * (q[0] * q[1] + q[2] * q[3]) * vector[0] +
+                            (1 - 2 * q[0]**2 - 2 * q[2]**2) * vector[1] +
+                            2 * (q[1] * q[2] - q[0] * q[3]) * vector[2])
+        vector_rotated[2] = (2 * (q[0] * q[2] - q[1] * q[3]) * vector[0] + 
+                            2 * (q[1] * q[2] + q[0] * q[3]) * vector[1] +
+                            (1 - 2 * q[0]**2 - 2 * q[1]**2) * vector[2])
+        return vector_rotated.copy()
     
     @property #scale vector
     def scale(self):
@@ -550,7 +595,12 @@ class BasicTransformDecorator(ComponentDecorator):
         y = self.trs[1, 1];
         z = self.trs[2, 2];
         return [x, y, z];
+        
     
     def accept(self, system: pyECSS.System, event = None):
         pass # we want the decorator first to accept the visitor and only if needed the wrappe to accept it too
         #self._component.accept(system)
+        
+    
+    
+    
