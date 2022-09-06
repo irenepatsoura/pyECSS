@@ -13,7 +13,7 @@ import numpy as np
 from typing import List
 
 from pyECSS.Entity import Entity
-from pyECSS.Component import Component, BasicTransform, Camera, RenderMesh, CompNullIterator, BasicTransformDecorator
+from pyECSS.Component import Component, BasicTransform, Camera, RenderMesh, CompNullIterator, VectorQuaternion_BasicTransformDecorator
 
 import pyECSS.utilities as util
 
@@ -253,7 +253,7 @@ class TestComponentDecorator(unittest.TestCase):
         
         print("TestComponentDecorator:test_ComponentDecorator START".center(100, '-'))
         myComponent = BasicTransform()
-        myDecComp = BasicTransformDecorator(myComponent)
+        myDecComp = VectorQuaternion_BasicTransformDecorator(myComponent)
         
         self.assertEqual(myDecComp.component.name, "BasicTransform")
         self.assertEqual(myDecComp.component.type,"BasicTransform")
