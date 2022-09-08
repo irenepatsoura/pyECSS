@@ -23,11 +23,15 @@ from math import atan2
 from typing             import List
 from collections.abc    import Iterable, Iterator
 from numbers import Number
+from pyECSS.dual_quaternion import DualQuaternion
+from pyECSS.quaternion import Quaternion
 
 import pyECSS.System
 import uuid  
 import pyECSS.utilities as util
 import numpy as np
+import math
+from clifford.g3 import *  # import GA for 3D space
 
 
 class Component(ABC, Iterable):
@@ -529,11 +533,11 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         print("New component has been initialized")
         
     @property #translation vector
-    def translation(self):
+    def translation_vec(self):
         return self.trs[:3,3];
     
-    def translate(self, tr_v):
-        coor = self.translation
+    def translate_vector(self, tr_v):
+        coor = self.translation_vec
         new_x = tr_v[0] + coor[0]
         new_y = tr_v[1] + coor[1]
         new_z = tr_v[2] + coor[2]
@@ -548,6 +552,18 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
     @trs.setter
     def trs(self, value):
         self._trs = value
+    
+    
+    def translate_dual_quaternion(self, point_x=0.0, point_y=0.0, point_z=0.0, t_x=0.0, t_y=0.0, t_z=0.0): 
+        qp = Quaternion(point_x,point_y,point_z,0)
+        qt = Quaternion(t_x,t_y,t_z,0)
+        qI = Quaternion(0,0,0,1)
+        T_dq = DualQuaternion(qI,0.5*qt)
+        point_dq = DualQuaternion(qI,qp)
+        T_dq_prime = T_dq.conjugate_translation()
+        
+        translated_point_dq = T_dq*point_dq*T_dq_prime
+        return translated_point_dq.q_dual.q[0:3]
         
     
     def quaternion(self, x=0.0, y=0.0, z=0.0, w=1.0, q=None):
@@ -561,8 +577,21 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
             print("This is not supported. Type of q is {}".format(type(q)))
             assert False
         return q
+    
+    def rotate_multivector(self, vec, rot_ang):
+
+        u = (e1+e2+e3)
+        u = u/abs(u) # normalized vector
+
+        I3 = e1*e2*e3 # I3, note that *=geometric product
+
         
-    def rotate(self):
+        R = math.e**(-(u*I3)*(rot_ang/2)) # rotor
+        
+        assert(R == np.cos(rot_ang/2)-u*I3*np.sin(rot_ang/2))
+        return R*vec*~R
+        
+    def rotate_quaternion(self):
         
         rotation_matrix = self.trs.copy()
     
@@ -576,7 +605,7 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
     
     def rotate_vector(self, vector):
     
-        q = self.rotate()
+        q = self.rotate_quaternion()
         vector_rotated = np.zeros(3)
         vector_rotated[0] = ((1 - 2 * q[1]**2 - 2 * q[2]**2) * vector[0] +
                             2 * (q[0] * q[1] - q[2] * q[3]) * vector[1] +
@@ -601,6 +630,12 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         pass # we want the decorator first to accept the visitor and only if needed the wrappe to accept it too
         #self._component.accept(system)
         
-    
-    
+# if __name__ == "__main__":
+#     a = VectorQuaternion_BasicTransformDecorator()
+#     print (" we want to translate the point (5,3,2) by t = (2,3,14) ")    
+#     print( 'translated point: ', a.translate_dual_quaternion(5,3,2,2,3,14) )
+#     O = 5*e1 # our object: the point (5,0,0)
+#     print ('Original Point-Object = ', O)
+#     print( 'Rotated Point-object = ', a.rotate_multivector(O,2*math.pi/3)) # the rotated object, ie, the point (0,5,0)
+
     

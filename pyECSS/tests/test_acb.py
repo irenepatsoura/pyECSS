@@ -1,11 +1,10 @@
 import unittest
 import numpy as np
-import math
-from clifford.g3 import *  # import GA for 3D space
 
-from pyECSS.Entity import Entity
-from pyECSS.quaternion import Quaternion
+# from pyECSS.Entity import Entity
+# from quaternion import Quaternion
 from pyECSS.Component import  BasicTransform,  VectorQuaternion_BasicTransformDecorator
+from pyECSS.dual_quaternion import DualQuaternion
 
 
 class TestComponent(unittest.TestCase):
@@ -38,7 +37,7 @@ class TestComponent(unittest.TestCase):
         gameComponent2 = VectorQuaternion_BasicTransformDecorator("Transform2", "TRS2", 202)
         
         tr_v = [2, 3, 4]
-        a = gameComponent2.translate_vector(tr_v)
+        a = gameComponent2.translate(tr_v)
         a = np.array([round(a[0], 1),round(a[1], 1),round(a[2], 1)])
         b = np.array([2.0, 3.0, 4.0])
         
@@ -53,15 +52,6 @@ class TestComponent(unittest.TestCase):
         
         for i in range(3):
             self.assertEqual(a[i],b[i])
-            
-    def test_rotation_multivector(self):
-        obj = VectorQuaternion_BasicTransformDecorator()
-        b = -(0.000000000005^e1) + (5.0^e2) + (0.000000000005^e3)
-        a = 5*e1 # our object: the point (5,0,0)
-    
-        a = obj.rotate_multivector(a,2*math.pi/3) # the rotated object, ie, the point (0,5,0)
-        self.assertAlmostEqual(a,b,3)
-
     
     
     print("TestComponent:test_init() END")
