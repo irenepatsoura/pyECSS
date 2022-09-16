@@ -19,19 +19,22 @@ Based on the Composite and Iterator design patterns
 from __future__         import annotations
 from abc                import ABC, abstractmethod
 from gettext import translation
+from logging.handlers import DEFAULT_UDP_LOGGING_PORT
 from math import atan2
 from typing             import List
 from collections.abc    import Iterable, Iterator
 from numbers import Number
 from pyECSS.dual_quaternion import DualQuaternion
 from pyECSS.quaternion import Quaternion
+from clifford.g3 import *  # import GA for 3D space
+from pyECSS.type_conversion_functs import Conversions
 
 import pyECSS.System
 import uuid  
 import pyECSS.utilities as util
 import numpy as np
 import math
-from clifford.g3 import *  # import GA for 3D space
+
 
 
 class Component(ABC, Iterable):
@@ -512,7 +515,7 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
     :param ComponentDecorator: [description]
     :type ComponentDecorator: [type]
     """
-    def __init__(self,name=None, type=None, id=None, trs=None):
+    def __init__(self,name=None, type=None, id=None, trs=None, q=None, dq=None, vec=None, rot=None):
         """
         example of a decorator
         """
@@ -522,13 +525,31 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
             self._trs = util.identity()
         else:
             self._trs = trs
-        print("test-")
+        
+        
+        if not (q is None):
+            self._trs = q.to_transformation_matrix
+            
+        if not (dq is None):
+            q_rot = dq.q_rot
+
+            q_dual = dq.q_dual
+ 
+            self._trs = DualQuaternion(q_rot, q_dual).to_matrix
+            
+        if not (vec is None):
+            self._trs = Conversions.ir_vec_2_trs(vec)
+            
+        if not (rot is None):
+            tmp = Conversions.ir_rotor_2_quat(rot)
+            self._trs = (tmp).to_transformation_matrix
+         
+        # print("test-")
         self._l2world = util.identity()
         self._l2cam = util.identity()
         self._parent = self
         self._children = []
-        #call any extra methods before or after
-        
+        #call any extra methods before or after   
         
         print("New component has been initialized")
         
@@ -588,6 +609,7 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         
         R = math.e**(-(u*I3)*(rot_ang/2)) # rotor
         
+        
         assert(R == np.cos(rot_ang/2)-u*I3*np.sin(rot_ang/2))
         return R*vec*~R
         
@@ -605,7 +627,8 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
     
     def rotate_vector(self, vector):
     
-        q = self.rotate_quaternion()
+        # q = self.rotate_quaternion()
+        q = self.q
         vector_rotated = np.zeros(3)
         vector_rotated[0] = ((1 - 2 * q[1]**2 - 2 * q[2]**2) * vector[0] +
                             2 * (q[0] * q[1] - q[2] * q[3]) * vector[1] +
