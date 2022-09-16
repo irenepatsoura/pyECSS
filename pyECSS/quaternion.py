@@ -327,6 +327,7 @@ def angular_velocity_between_quaternions(q1, q2, t):
 
 if __name__ == "__main__":
     vec = [1,1,1]
+    b = np.array([1.0000,    1.0000,    1.0000])
     q = Quaternion(0,1,0,1)
-    print(q.rotate_vector(vec))
+    print(q.to_rotation_matrix())
     
