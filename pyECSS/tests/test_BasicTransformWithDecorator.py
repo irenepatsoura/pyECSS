@@ -2,8 +2,9 @@ import imp
 import unittest
 import numpy as np
 import math
-from clifford.g3 import *  # import GA for 3D space
+import pyECSS.utilities as util
 
+from clifford.g3 import *  # import GA for 3D space
 from pyECSS.Entity import Entity
 from pyECSS.quaternion import Quaternion
 from pyECSS.dual_quaternion import DualQuaternion
@@ -81,13 +82,13 @@ class TestComponent(unittest.TestCase):
     #     print("TestComponent:test_rotation_matrix_to_quaternion() START")
         
         
-    #     rot_v = np.array([1,1,1])
-    #     a = self.gameComponent2.rotate_vector(rot_v)
-    #     b = np.array([1.0000,    1.0000,    1.0000])
-    #     a = np.array([round(a[0], 4),round(a[1], 4),round(a[2], 4)])
+        # rot_v = np.array([1,1,1])
+        # a = self.gameComponent2.rotate_vector(rot_v)
+        # b = np.array([1.0000,    1.0000,    1.0000])
+        # a = np.array([round(a[0], 4),round(a[1], 4),round(a[2], 4)])
         
-    #     for i in range(3):
-    #         self.assertEqual(a[i],b[i])
+        # for i in range(3):
+        #     self.assertEqual(a[i],b[i])
 
     # def test_translation_matrix_to_vector(self):
         
