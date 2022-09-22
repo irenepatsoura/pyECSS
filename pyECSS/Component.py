@@ -526,6 +526,12 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         else:
             self._trs = trs
         
+        if not (q is None or vec is None):
+            buf = q.to_transformation_matrix()
+            print("buffer is ",buf)
+            for i in range(3):
+                buf[i,3] = vec[i]  
+            self._trs = buf
         
         if not (q is None):
             self._trs = q.to_transformation_matrix
