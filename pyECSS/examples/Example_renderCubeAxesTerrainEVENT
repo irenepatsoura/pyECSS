@@ -7,7 +7,6 @@ import numpy as np
 
 import pyECSS.utilities as util
 from pyECSS.Entity import Entity
-# from pyECSS.Component import BasicTransform, Camera, RenderMesh
 from pyECSS.Component import VectorQuaternion_BasicTransformDecorator, Camera, RenderMesh
 from pyECSS.System import System, TransformSystem, CameraSystem, RenderSystem
 from pyGLV.GL.Scene import Scene
@@ -25,52 +24,29 @@ import OpenGL.GL as gl
 
 
 
-"""
-Common setup for all unit tests
-
-Scenegraph for unit tests:
-
-root
-    |---------------------------|           
-    entityCam1,                 node4,      
-    |-------|                    |--------------|----------|--------------|           
-    trans1, entityCam2           trans4,        mesh4,     shaderDec4     vArray4
-            |                               
-            ortho, trans2                   
-                                                        
-                                                        
-    
-"""
-
-
 s1 = Scene()
 scene = Scene()    
-# assertEqual(s1, scene)
 
 # Scenegraph with Entities, Components
 rootEntity = scene.world.createEntity(Entity(name="RooT"))
 entityCam1 = scene.world.createEntity(Entity(name="entityCam1"))
 scene.world.addEntityChild(rootEntity, entityCam1)
-# trans1 = scene.world.addComponent(entityCam1, BasicTransform(name="trans1", trs=util.identity()))
 quat = Quaternion(0,0,0,1)
 trans1 = scene.world.addComponent(entityCam1, VectorQuaternion_BasicTransformDecorator(name="trans1", q=quat))
 
 entityCam2 = scene.world.createEntity(Entity(name="entityCam2"))
 scene.world.addEntityChild(entityCam1, entityCam2)
-# trans2 = scene.world.addComponent(entityCam2, BasicTransform(name="trans2", trs=util.identity()))
 trans2 = scene.world.addComponent(entityCam2, VectorQuaternion_BasicTransformDecorator(name="trans2", q=quat))
 orthoCam = scene.world.addComponent(entityCam2, Camera(util.ortho(-100.0, 100.0, -100.0, 100.0, 1.0, 100.0), "orthoCam","Camera","500"))
 
 node4 = scene.world.createEntity(Entity(name="node4"))
 scene.world.addEntityChild(rootEntity, node4)
-# trans4 = scene.world.addComponent(node4, BasicTransform(name="trans4", trs=util.identity()))
 trans4 = scene.world.addComponent(node4, VectorQuaternion_BasicTransformDecorator(name="trans4", q=quat))
 mesh4 = scene.world.addComponent(node4, RenderMesh(name="mesh4"))
 
 
 axes = scene.world.createEntity(Entity(name="axes"))
 scene.world.addEntityChild(rootEntity, axes)
-# axes_trans = scene.world.addComponent(axes, BasicTransform(name="axes_trans", trs=util.identity()))
 axes_trans = scene.world.addComponent(axes, VectorQuaternion_BasicTransformDecorator(name="axes_trans", q=quat))
 axes_mesh = scene.world.addComponent(axes, RenderMesh(name="axes_mesh"))
 
@@ -147,14 +123,6 @@ initUpdate = scene.world.createSystem(InitGLShaderSystem())
 ####################################################################################################
 ####################################################################################################
 ####################################################################################################
-# def test_renderCubeAxesTerrainEVENT(self):
-        
-
-        # """
-        # test_renderCubeAxesTerrainEVENT
-        # """
-        # print("TestScene:test_renderCubeAxesTerrainEVENT START".center(100, '-'))
-        
         ## ADD CUBE ##
         # attach a simple cube in a RenderMesh so that VertexArray can pick it up
 mesh4.vertex_attributes.append(vertexCube)
@@ -171,7 +139,6 @@ vertexTerrain, indexTerrain, colorTerrain= generateTerrain(size=4,N=20)
 # Add terrain
 terrain = scene.world.createEntity(Entity(name="terrain"))
 scene.world.addEntityChild(rootEntity, terrain)
-# terrain_trans = scene.world.addComponent(terrain, BasicTransform(name="terrain_trans", trs=util.identity()))
 terrain_trans = scene.world.addComponent(terrain, VectorQuaternion_BasicTransformDecorator(name="terrain_trans", q=quat))
 terrain_mesh = scene.world.addComponent(terrain, RenderMesh(name="terrain_mesh"))
 terrain_mesh.vertex_attributes.append(vertexTerrain) 
@@ -179,12 +146,10 @@ terrain_mesh.vertex_attributes.append(colorTerrain)
 terrain_mesh.vertex_index.append(indexTerrain)
 terrain_vArray = scene.world.addComponent(terrain, VertexArray(primitive=GL_LINES))
 terrain_shader = scene.world.addComponent(terrain, ShaderGLDecorator(Shader(vertex_source = Shader.COLOR_VERT_MVP, fragment_source=Shader.COLOR_FRAG)))
-# self.terrain_shader.setUniformVariable(key='modelViewProj', value=mvpMat, mat4=True)
 
 ## ADD AXES ##
 axes = scene.world.createEntity(Entity(name="axes"))
 scene.world.addEntityChild(rootEntity, axes)
-# axes_trans = scene.world.addComponent(axes, BasicTransform(name="axes_trans", trs=util.identity()))
 axes_trans = scene.world.addComponent(axes, VectorQuaternion_BasicTransformDecorator(name="axes_trans", q=quat))
 axes_mesh = scene.world.addComponent(axes, RenderMesh(name="axes_mesh"))
 axes_mesh.vertex_attributes.append(vertexAxes) 
@@ -192,10 +157,8 @@ axes_mesh.vertex_attributes.append(colorAxes)
 axes_mesh.vertex_index.append(indexAxes)
 axes_vArray = scene.world.addComponent(axes, VertexArray(primitive=GL_LINES)) # note the primitive change
 
-# self.shaderDec_axes = self.scene.world.addComponent(self.axes, Shader())
 # OR
 axes_shader = scene.world.addComponent(axes, ShaderGLDecorator(Shader(vertex_source = Shader.COLOR_VERT_MVP, fragment_source=Shader.COLOR_FRAG)))
-# self.axes_shader.setUniformVariable(key='modelViewProj', value=mvpMat, mat4=True)
 
 
 running = True
@@ -270,7 +233,5 @@ while running:
     scene.render_post()
     
 scene.shutdown()
-
-# print("TestScene:test_renderCubeAxesTerrainEVENT END".center(100, '-'))
 
 

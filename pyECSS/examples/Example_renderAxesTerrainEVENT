@@ -3,11 +3,9 @@ from turtle import width
 import unittest
 
 import numpy as np
-# from sympy import true
 
 import pyECSS.utilities as util
 from pyECSS.Entity import Entity
-# from pyECSS.Component import BasicTransform, Camera, RenderMesh
 from pyECSS.Component import VectorQuaternion_BasicTransformDecorator, Camera, RenderMesh
 from pyECSS.System import System, TransformSystem, CameraSystem, RenderSystem
 from pyGLV.GL.Scene import Scene
@@ -24,25 +22,6 @@ import OpenGL.GL as gl
 
 
 
-
-"""
-Common setup for all unit tests
-
-Scenegraph for unit tests:
-
-root
-    |---------------------------|           
-    entityCam1,                 node4,      
-    |-------|                    |--------------|----------|--------------|           
-    trans1, entityCam2           trans4,        mesh4,     shaderDec4     vArray4
-            |                               
-            ortho, trans2                   
-                                                        
-                                                        
-    
-"""
-
-
 s1 = Scene()
 scene = Scene()    
 # assertEqual(s1, scene)
@@ -51,26 +30,22 @@ scene = Scene()
 rootEntity = scene.world.createEntity(Entity(name="RooT"))
 entityCam1 = scene.world.createEntity(Entity(name="entityCam1"))
 scene.world.addEntityChild(rootEntity, entityCam1)
-# trans1 = scene.world.addComponent(entityCam1, BasicTransform(name="trans1", trs=util.identity()))
 quat = Quaternion(0,0,0,1)
 trans1 = scene.world.addComponent(entityCam1, VectorQuaternion_BasicTransformDecorator(name="trans1", q=quat))
 
 entityCam2 = scene.world.createEntity(Entity(name="entityCam2"))
 scene.world.addEntityChild(entityCam1, entityCam2)
-# trans2 = scene.world.addComponent(entityCam2, BasicTransform(name="trans2", trs=util.identity()))
 trans2 = scene.world.addComponent(entityCam2, VectorQuaternion_BasicTransformDecorator(name="trans2", q=quat))
 orthoCam = scene.world.addComponent(entityCam2, Camera(util.ortho(-100.0, 100.0, -100.0, 100.0, 1.0, 100.0), "orthoCam","Camera","500"))
 
 node4 = scene.world.createEntity(Entity(name="node4"))
 scene.world.addEntityChild(rootEntity, node4)
-# trans4 = scene.world.addComponent(node4, BasicTransform(name="trans4", trs=util.identity()))
 trans4 = scene.world.addComponent(node4, VectorQuaternion_BasicTransformDecorator(name="trans4", q=quat))
 mesh4 = scene.world.addComponent(node4, RenderMesh(name="mesh4"))
 
 
 axes = scene.world.createEntity(Entity(name="axes"))
 scene.world.addEntityChild(rootEntity, axes)
-# axes_trans = scene.world.addComponent(axes, BasicTransform(name="axes_trans", trs=util.identity()))
 axes_trans = scene.world.addComponent(axes, VectorQuaternion_BasicTransformDecorator(name="axes_trans", q=quat))
 axes_mesh = scene.world.addComponent(axes, RenderMesh(name="axes_mesh"))
 
@@ -147,11 +122,6 @@ initUpdate = scene.world.createSystem(InitGLShaderSystem())
 ####################################################################################################
 ####################################################################################################
 ####################################################################################################
-# def test_renderAxesTerrainEVENT(self):
-#         """
-#         First time to test a RenderSystem in a Scene with Shader and VertexArray components
-#         """
-#         print("TestScene:test_render START".center(100, '-'))
         
         
 
@@ -162,16 +132,12 @@ target = util.vec(0.0, 0.0, 0.0)
 up = util.vec(0.0, 1.0, 0.0)
 view = util.lookat(eye, target, up)
 
-# projMat = util.ortho(-10.0, 10.0, -10.0, 10.0, -1.0, 10.0)
-projMat = util.perspective(90.0, 1.33, 0.1, 100)
-# projMat = util.perspective(90.0, 1, 0.01, 100.0) 
+projMat = util.perspective(90.0, 1.33, 0.1, 100) 
 
 
 
-# mvpMat =  projMat @ view @ model
 
 shaderDec4 = scene.world.addComponent(node4, ShaderGLDecorator(Shader(vertex_source = Shader.COLOR_VERT_MVP, fragment_source=Shader.COLOR_FRAG)))
-# self.shaderDec4.setUniformVariable(key='modelViewProj', value=mvpMat, mat4=True)
 
 from pyGLV.GL.terrain import generateTerrain
 vertexTerrain, indexTerrain, colorTerrain= generateTerrain(size=2,N=20)
@@ -182,14 +148,12 @@ vertexTerrain, indexTerrain, colorTerrain= generateTerrain(size=2,N=20)
 mesh4.vertex_attributes.append(vertexTerrain) 
 mesh4.vertex_attributes.append(colorTerrain)
 mesh4.vertex_index.append(indexTerrain)
-# self.vArray4 = self.scene.world.addComponent(self.node4, VertexArray())
 vArray4 = scene.world.addComponent(node4, VertexArray(primitive=GL_LINES))
 
 
 ## ADD AXES TO THIS MESH ##
 axes = scene.world.createEntity(Entity(name="axes"))
 scene.world.addEntityChild(rootEntity, axes)
-# axes_trans = scene.world.addComponent(axes, BasicTransform(name="axes_trans", trs=util.identity()))
 axes_trans = scene.world.addComponent(axes, VectorQuaternion_BasicTransformDecorator(name="axes_trans", q=quat))
 axes_mesh = scene.world.addComponent(axes, RenderMesh(name="axes_mesh"))
 
@@ -200,10 +164,8 @@ axes_mesh.vertex_attributes.append(colorAxes)
 axes_mesh.vertex_index.append(indexAxes)
 axes_vArray = scene.world.addComponent(axes, VertexArray(primitive=GL_LINES)) # note the primitive change
 
-# self.shaderDec_axes = self.scene.world.addComponent(self.axes, Shader())
 # OR
 shaderDec42 = scene.world.addComponent(axes, ShaderGLDecorator(Shader(vertex_source = Shader.COLOR_VERT_MVP, fragment_source=Shader.COLOR_FRAG)))
-# self.shaderDec42.setUniformVariable(key='modelViewProj', value=mvpMat, mat4=True)
 
 
 running = True
@@ -265,7 +227,6 @@ while running:
     
 scene.shutdown()
 
-# print("TestScene:test_renderAxesTerrainEVENT END".center(100, '-'))
 
 ####################################################################################################
 ####################################################################################################
