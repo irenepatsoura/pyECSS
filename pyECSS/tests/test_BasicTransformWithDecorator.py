@@ -22,6 +22,7 @@ class TestComponent(unittest.TestCase):
         
         q = Quaternion(0,1,0,1)
         self.new_quat = VectorQuaternion_BasicTransformDecorator("Transform", "TRS", 203, None, q=q )
+        self.new_quat_vec = VectorQuaternion_BasicTransformDecorator("Transform", "TRS", 207, None, q=q , vec=np.array([1,2,3]))
 
         
         q_rot = Quaternion(0, 0, 0, 1)
@@ -35,14 +36,26 @@ class TestComponent(unittest.TestCase):
         rotor = np.array([1,2,3,4])
         self.new_rotor = VectorQuaternion_BasicTransformDecorator("Transform", "TRS", 206, None, None, None, None, rotor)
         
-    
+    def test_d_vec_2_trs(self):
+        a = np.array([[-1,  0,  2, 1],
+                      [ 0,  1,  0, 2],
+                      [-2,  0, -1, 3],
+                      [ 0 , 0,  0, 1]])
+       
+        b = self.new_quat_vec.trs
+        
+        self.assertAlmostEqual(a.all(),b.all(),1)
         
 
     def test_q_2_trs(self):
         
-        a = np.array([[-1,  0,  2, 0],[ 0,  1,  0, 0],[-2,  0, -1, 0],[0 ,0, 0, 1]])
+        a = np.array([[-1,  0,  2, 0],
+                      [ 0,  1,  0, 0],
+                      [-2,  0, -1, 0],
+                      [ 0 , 0,  0, 1]])
        
         b = self.new_quat.trs()
+        print("b is",b)
         
         self.assertAlmostEqual(a.all(),b.all(),1)
             
