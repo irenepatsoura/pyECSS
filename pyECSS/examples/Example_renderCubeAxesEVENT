@@ -7,7 +7,6 @@ import numpy as np
 
 import pyECSS.utilities as util
 from pyECSS.Entity import Entity
-# from pyECSS.Component import BasicTransform, Camera, RenderMesh
 from pyECSS.Component import VectorQuaternion_BasicTransformDecorator, Camera, RenderMesh
 from pyECSS.System import System, TransformSystem, CameraSystem, RenderSystem
 from pyGLV.GL.Scene import Scene
@@ -24,52 +23,30 @@ import OpenGL.GL as gl
 
 
 
-"""
-Common setup for all unit tests
-
-Scenegraph for unit tests:
-
-root
-    |---------------------------|           
-    entityCam1,                 node4,      
-    |-------|                    |--------------|----------|--------------|           
-    trans1, entityCam2           trans4,        mesh4,     shaderDec4     vArray4
-            |                               
-            ortho, trans2                   
-                                                        
-                                                        
-    
-"""
-
 
 s1 = Scene()
 scene = Scene()    
-# assertEqual(s1, scene)
 
 # Scenegraph with Entities, Components
 rootEntity = scene.world.createEntity(Entity(name="RooT"))
 entityCam1 = scene.world.createEntity(Entity(name="entityCam1"))
 scene.world.addEntityChild(rootEntity, entityCam1)
-# trans1 = scene.world.addComponent(entityCam1, BasicTransform(name="trans1", trs=util.identity()))
 quat = Quaternion(0,0,0,1)
 trans1 = scene.world.addComponent(entityCam1, VectorQuaternion_BasicTransformDecorator(name="trans1", q=quat))
 
 entityCam2 = scene.world.createEntity(Entity(name="entityCam2"))
 scene.world.addEntityChild(entityCam1, entityCam2)
-# trans2 = scene.world.addComponent(entityCam2, BasicTransform(name="trans2", trs=util.identity()))
 trans2 = scene.world.addComponent(entityCam2, VectorQuaternion_BasicTransformDecorator(name="trans2", q=quat))
 orthoCam = scene.world.addComponent(entityCam2, Camera(util.ortho(-100.0, 100.0, -100.0, 100.0, 1.0, 100.0), "orthoCam","Camera","500"))
 
 node4 = scene.world.createEntity(Entity(name="node4"))
 scene.world.addEntityChild(rootEntity, node4)
-# trans4 = scene.world.addComponent(node4, BasicTransform(name="trans4", trs=util.identity()))
 trans4 = scene.world.addComponent(node4, VectorQuaternion_BasicTransformDecorator(name="trans4", q=quat))
 mesh4 = scene.world.addComponent(node4, RenderMesh(name="mesh4"))
 
 
 axes = scene.world.createEntity(Entity(name="axes"))
 scene.world.addEntityChild(rootEntity, axes)
-# axes_trans = scene.world.addComponent(axes, BasicTransform(name="axes_trans", trs=util.identity()))
 axes_trans = scene.world.addComponent(axes, VectorQuaternion_BasicTransformDecorator(name="axes_trans", q=quat))
 axes_mesh = scene.world.addComponent(axes, RenderMesh(name="axes_mesh"))
 
@@ -146,12 +123,6 @@ initUpdate = scene.world.createSystem(InitGLShaderSystem())
 ####################################################################################################
 ####################################################################################################
 ####################################################################################################
-# def test_renderCubeAxesEVENT(self):
-"""
-test_renderCubeAxesEVENT
-"""
-print("TestScene:test_renderCubeAxesEVENT START".center(100, '-'))
-
 ################# 
 # ADD ENTITIES  #
 #################    
@@ -169,7 +140,6 @@ shaderDec4 = scene.world.addComponent(node4, ShaderGLDecorator(Shader(vertex_sou
 ## ADD AXES ##
 axes = scene.world.createEntity(Entity(name="axes"))
 scene.world.addEntityChild(rootEntity, axes)
-# axes_trans = scene.world.addComponent(axes, BasicTransform(name="axes_trans", trs=util.identity()))
 axes_trans = scene.world.addComponent(axes, VectorQuaternion_BasicTransformDecorator(name="axes_trans", q=quat))
 axes_mesh = scene.world.addComponent(axes, RenderMesh(name="axes_mesh"))
 axes_mesh.vertex_attributes.append(vertexAxes) 
@@ -234,7 +204,6 @@ while running:
     
 scene.shutdown()
 
-print("TestScene:test_renderCubeAxesEVENT END".center(100, '-'))
 
 ####################################################################################################
 ####################################################################################################
