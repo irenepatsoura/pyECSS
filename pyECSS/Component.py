@@ -559,6 +559,14 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         
         print("New component has been initialized")
         
+    @property #l2world
+    def l2world(self):
+        """ Get Component's local to world transform: translation, rotation ,scale """
+        return self._l2world
+    @l2world.setter
+    def l2world(self, value):
+        self._l2world = value
+        
     @property #translation vector
     def translation_vec(self):
         return self.trs[:3,3];
