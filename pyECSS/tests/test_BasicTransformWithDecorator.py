@@ -31,7 +31,9 @@ class TestComponent(unittest.TestCase):
         self.new_dq = VectorQuaternion_BasicTransformDecorator("Transform", "TRS", 204, None, None,dq)
         
         vector = np.array([1,1,-1])
-        self.new_vector = VectorQuaternion_BasicTransformDecorator("Transform", "TRS", 205, None, None, None, vector)
+        vector2 = np.array([1,2,3])
+        # self.new_vector = VectorQuaternion_BasicTransformDecorator("Transform", "TRS", 205, None, None, None, vector)
+        self.new_vector = VectorQuaternion_BasicTransformDecorator("Transform", "TRS", 205, None, None, None, vector2)
         
         rotor = np.array([1,2,3,4])
         self.new_rotor = VectorQuaternion_BasicTransformDecorator("Transform", "TRS", 206, None, None, None, None, rotor)
@@ -69,8 +71,8 @@ class TestComponent(unittest.TestCase):
         
     def test_vec_2_trs(self):
         a = np.array([[ 1,  0,  0,  1],
-                      [ 0,  1,  0,  1],
-                      [ 0,  0,  1, -1],
+                      [ 0,  1,  0,  2],
+                      [ 0,  0,  1,  3],
                       [ 0,  0,  0,  1]])
         b = self.new_vector.trs
         self.assertAlmostEqual(a.all(),b.all(),1)
