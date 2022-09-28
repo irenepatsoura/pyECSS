@@ -281,25 +281,25 @@ class BasicTransform(Component):
 
     @property #translation vector
     def translation(self):
-        return self.trs[:3,3];
+        return self.trs[:3,3]
     @property #rotation vector
     def rotationEulerAngles(self):
         # First get rotation matrix from trs. Divide by scale
-        rotationMatrix = self.trs.copy();
-        rotationMatrix[:][0] /= self.scale[0];
-        rotationMatrix[:][1] /= self.scale[1];
-        rotationMatrix[:][2] /= self.scale[2];
+        rotationMatrix = self.trs.copy()
+        rotationMatrix[:][0] /= self.scale[0]
+        rotationMatrix[:][1] /= self.scale[1]
+        rotationMatrix[:][2] /= self.scale[2]
         # Now, extract euler angles from rotation matrix
-        x = atan2(rotationMatrix[1][2], rotationMatrix[2][2]);
-        y = 0;
-        z = 0;
-        return [x, y, z];
+        x = atan2(rotationMatrix[1][2], rotationMatrix[2][2])
+        y = 0
+        z = 0
+        return [x, y, z]
     @property #scale vector
     def scale(self):
-        x = self.trs[0, 0];
-        y = self.trs[1, 1];
-        z = self.trs[2, 2];
-        return [x, y, z];
+        x = self.trs[0, 0]
+        y = self.trs[1, 1]
+        z = self.trs[2, 2]
+        return [x, y, z]
 
     def update(self, **kwargs):
         """ Local 2 world transformation calculation
@@ -520,6 +520,25 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         example of a decorator
         """
         super().__init__(name, type, id)
+        if (name is None):
+            self._name = self.getClassName()
+        else:
+            self._name = name
+        
+        if (type is None):
+            self._type = self.getClassName()
+        else:
+            self._type = type
+        
+        if id is None:
+            self._id = uuid.uuid1().int #assign unique ID on Component
+        else:
+            self._id = id
+        
+        self._parent = self
+        self._children = None
+        self._worldManager = None
+        self._eventManager = None
         
         if (trs is None):
             self._trs = util.identity()
@@ -566,6 +585,14 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
     @l2world.setter
     def l2world(self, value):
         self._l2world = value
+    
+    @property #parent
+    def parent(self) -> Component:
+        """ Get Component's parent """
+        return self._parent
+    @parent.setter
+    def parent(self, value):
+        self._parent = value
         
     @property #translation vector
     def translation_vec(self):
@@ -590,6 +617,7 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
     
     
     def translate_dual_quaternion(self, point_x=0.0, point_y=0.0, point_z=0.0, t_x=0.0, t_y=0.0, t_z=0.0): 
+        """ Translate Component by Point using Dual Quaternion  """
         qp = Quaternion(point_x,point_y,point_z,0)
         qt = Quaternion(t_x,t_y,t_z,0)
         qI = Quaternion(0,0,0,1)
@@ -602,6 +630,7 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         
     
     def quaternion(self, x=0.0, y=0.0, z=0.0, w=1.0, q=None):
+        """ Returns a Quaternion with values x,y,z,w """
         if q is None:
             for i in [x, y, z, w]:
                 assert isinstance(i, Number), "x, y, z, w should be scalars."
@@ -614,7 +643,7 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         return q
     
     def rotate_multivector(self, vec, rot_ang):
-
+        """ Get's the rotation vector and angles and returns the multivector """
         u = (e1+e2+e3)
         u = u/abs(u) # normalized vector
 
@@ -628,7 +657,7 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         return R*vec*~R
         
     def rotate_quaternion(self):
-        
+        """ Returns the Quaternion rotated """
         rotation_matrix = self.trs.copy()
     
         w = np.sqrt(
@@ -640,7 +669,7 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         return self.quaternion(x, y, z, w)
     
     def rotate_vector(self, vector):
-    
+        """ Returns the vector rotated """
         # q = self.rotate_quaternion()
         q = self.q
         vector_rotated = np.zeros(3)
@@ -661,11 +690,54 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         y = self.trs[1, 1];
         z = self.trs[2, 2];
         return [x, y, z];
+    
+    def update(self, **kwargs):
+        """ Local 2 world transformation calculation
+        Traverses upwards whole scenegraph and multiply all transformations along this path
         
+        Arguments could be "l2world=" or "trs=" or "l2cam=" to set respective matrices 
+        """
+        print(self.getClassName(), ": update() called")
+        arg1 = "l2world"
+        arg2 = "trs"
+        arg3 = "l2cam"
+        if arg1 in kwargs:
+            print("Setting: ", arg1," with: \n", kwargs[arg1])
+            self._l2world = kwargs[arg1]
+        if arg2 in kwargs:
+            print("Setting: ", arg2," with: \n", kwargs[arg2])
+            self._trs = kwargs[arg2]
+        if arg3 in kwargs:
+            print("Setting: ", arg3," with: \n", kwargs[arg3])
+            self._l2cam = kwargs[arg3]
+        
+    def print(self):
+        """
+        prints out name, type, id, parent of this Component
+        """
+        print(f"\n {self.getClassName()} name: {self._name}, type: {self._type}, id: {self._id}, parent: {self._parent._name}")
+        print(f" ______________________________________________________________")
+     
+    def __str__(self):
+        return f"\n {self.getClassName()} name: {self._name}, type: {self._type}, id: {self._id}, parent: {self._parent._name}"   
     
     def accept(self, system: pyECSS.System, event = None):
-        pass # we want the decorator first to accept the visitor and only if needed the wrappe to accept it too
-        #self._component.accept(system)
+        """
+        Accepts a class object to operate on the Component, based on the Visitor pattern.
+
+        :param system: [a System object]
+        :type system: [System]
+        """
+        
+        system.apply2BasicTransformDecorator(self) #from TransformSystem
+        system.applyCamera2BasicTransformDecorator(self) #from CameraSystem
+        """
+        if (isinstance(system, System.TransformSystem)):
+            system.apply(self)
+        
+        if (isinstance(system, System.CameraSystem)):
+            system.applyCamera(self)
+        """
         
 # if __name__ == "__main__":
 #     a = VectorQuaternion_BasicTransformDecorator()

@@ -224,6 +224,7 @@ class TransformSystem(System):
         # get parent Entity this BasicTransform Component belongs to
         componentEntity = leafComp.parent
         topAccessedEntity = componentEntity
+        
 
         # l2worldTRS = leafComp.l2world # wrong line
         l2worldTRS = util.identity(); # # correct one   
@@ -231,6 +232,45 @@ class TransformSystem(System):
         while(componentEntity is not topComp):
             # get that parent's TRS by type
             parentBasicTrans = componentEntity.getChildByType("BasicTransform")
+            # parentBasicTrans = componentEntity.getChildByType("VectorQuaternion_BasicTransformDecorator")
+            if(parentBasicTrans is not None and parentBasicTrans):
+                # l2worldTRS = l2worldTRS @ parentBasicTrans.trs # This doesnt work for me (mostly on rot/scale);
+                l2worldTRS = parentBasicTrans.trs @ l2worldTRS # This works for me ;
+
+            topAccessedEntity = componentEntity
+            componentEntity = componentEntity.parent
+            print("leafComp.parent:",leafComp.parent.name)
+        else: #parent is now the root node, so check if it has a Transform component
+            parentBasicTrans = topAccessedEntity.getChildByType("BasicTransform")
+            # parentBasicTrans = componentEntity.getChildByType("VectorQuaternion_BasicTransformDecorator")
+            if(parentBasicTrans is not None):
+                # l2world = multiply current with parent's TRS 
+                l2worldTRS = l2worldTRS @ parentBasicTrans.trs
+                
+        return l2worldTRS
+    
+    def getLocal2WorldDecorator(self, leafComp: pyECSS.Component, topComp=None):
+        """Calculate the l2world VectorQuaternion_BasicTransformDecorator matrix
+
+        :param leafComp: [description]
+        :type leafComp: Component
+        :param topComp: [description], defaults to None
+        :type topComp: [type], optional
+        :return: the local2world matrix of the visited VectorQuaternion_BasicTransformDecorator
+        :rtype: numpy.array
+        """
+        
+        # get parent Entity this VectorQuaternion_BasicTransformDecorator Component belongs to
+        componentEntity = leafComp.parent
+        print("leafComp.parent Decorator:", leafComp.parent)
+        topAccessedEntity = componentEntity
+
+        # l2worldTRS = leafComp.l2world # wrong line
+        l2worldTRS = util.identity(); # # correct one   
+        
+        while(componentEntity is not topComp):
+            # get that parent's TRS by type
+            parentBasicTrans = componentEntity.getChildByType("VectorQuaternion_BasicTransformDecorator")
             if(parentBasicTrans is not None and parentBasicTrans):
                 # l2worldTRS = l2worldTRS @ parentBasicTrans.trs # This doesnt work for me (mostly on rot/scale);
                 l2worldTRS = parentBasicTrans.trs @ l2worldTRS # This works for me ;
@@ -238,7 +278,8 @@ class TransformSystem(System):
             topAccessedEntity = componentEntity
             componentEntity = componentEntity.parent
         else: #parent is now the root node, so check if it has a Transform component
-            parentBasicTrans = topAccessedEntity.getChildByType("BasicTransform")
+            # parentBasicTrans = topAccessedEntity.getChildByType("BasicTransform")
+            parentBasicTrans = componentEntity.getChildByType("VectorQuaternion_BasicTransformDecorator")
             if(parentBasicTrans is not None):
                 # l2world = multiply current with parent's TRS 
                 l2worldTRS = l2worldTRS @ parentBasicTrans.trs
@@ -262,7 +303,25 @@ class TransformSystem(System):
         # getLocal2World returns result to be set in BasicTransform::update(**kwargs) below
         l2worldTRS = self.getLocal2World(basicTransform)
         #update l2world of basicTransform
-        basicTransform.update(l2world=l2worldTRS) 
+        basicTransform.update(l2world=l2worldTRS)
+    def apply2BasicTransformDecorator(self, basicTransformDecorator: pyECSS.Component.VectorQuaternion_BasicTransformDecorator):
+        """
+        method to be subclassed for  behavioral or logic computation 
+        when visits Components. 
+        
+        In this case calculate the l2w BasicTransform component matrix
+        
+        """
+        
+        #check if the visitor visits a node that it should not
+        if (isinstance(basicTransformDecorator,pyECSS.Component.VectorQuaternion_BasicTransformDecorator)) == False:
+            return #in Python due to duck typing we need to check this!
+        print(self.getClassName(), ": apply(BasicTransformDecorator) called")
+        
+        # getLocal2World returns result to be set in BasicTransform::update(**kwargs) below
+        l2worldTRS = self.getLocal2WorldDecorator(basicTransformDecorator)
+        #update l2world of basicTransform
+        basicTransformDecorator.update(l2world=l2worldTRS)  
 
 
 class CameraSystem(System):
@@ -331,12 +390,32 @@ class CameraSystem(System):
         print(self.getClassName(), ": apply(BasicTransform) called from CameraSystem - Calc: Local2Cam")
         
         #l2world of basicTransform has been calculated by the TransformSystem before this System
-        l2w = basicTransform.l2world;
-        r2c = self._camera.root2cam;
-        proj = self._camera.projMat;
+        l2w = basicTransform.l2world
+        r2c = self._camera.root2cam
+        proj = self._camera.projMat
 
         l2c = proj @ r2c @ l2w; # Not sure 100% sure why it didnt play for me before
-        basicTransform.update(l2cam=l2c) ;
+        basicTransform.update(l2cam=l2c) 
+    
+    def applyCamera2BasicTransformDecorator(self, basicTransformDecorator: pyECSS.Component.VectorQuaternion_BasicTransformDecorator):
+        """
+        method to be subclassed for  behavioral or logic computation 
+        when visits Components. 
+        
+        In this case calculate the l2w BasicTransformDecorator component matrix
+        
+        """
+        if (isinstance(basicTransformDecorator,pyECSS.Component.VectorQuaternion_BasicTransformDecorator)) == False:
+            return #in Python due to duck typing we need to check this!
+        print(self.getClassName(), ": apply(VectorQuaternion_BasicTransformDecorator) called from CameraSystem - Calc: Local2Cam")
+        
+        #l2world of basicTransform has been calculated by the TransformSystem before this System
+        l2w = basicTransformDecorator.l2world
+        r2c = self._camera.root2cam
+        proj = self._camera.projMat
+
+        l2c = proj @ r2c @ l2w; # Not sure 100% sure why it didnt play for me before
+        basicTransformDecorator.update(l2cam=l2c) ;
         
     #first this     
     def apply2Camera(self, cam: pyECSS.Component.Camera):
@@ -358,7 +437,6 @@ class CameraSystem(System):
         cam.update(root2cam=r2cam)
         #save camera component if not specified on constructor
         self._camera = cam 
-
 
 
 class RenderSystem(System):

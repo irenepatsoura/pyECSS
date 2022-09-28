@@ -118,6 +118,7 @@ class Entity(Component):
     
     def getChildByType(self, type) ->Component:
         for node in self._children:
+            # print("node in getChildByType: ",node,", ",node.type)
             if node.type == type:
                 return node
         return None
