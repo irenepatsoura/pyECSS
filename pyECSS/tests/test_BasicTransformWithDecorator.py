@@ -6,7 +6,7 @@ import pyECSS.utilities as util
 
 from clifford.g3 import *  # import GA for 3D space
 from pyECSS.Entity import Entity
-from pyECSS.quaternion import Quaternion
+from pyECSS.examples.quaternion import Quaternion
 from pyECSS.dual_quaternion import DualQuaternion
 from pyECSS.Component import  BasicTransform,  VectorQuaternion_BasicTransformDecorator
 

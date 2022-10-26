@@ -1,3 +1,5 @@
+from System_skinning import System_skinning
+from skinned_mesh import Skinned_mesh
 from statistics import mode
 from turtle import width
 import unittest
@@ -20,7 +22,6 @@ from pyGLV.GL.VertexArray import VertexArray
 from OpenGL.GL import GL_LINES
 
 import OpenGL.GL as gl
-
 
 
 
@@ -124,43 +125,86 @@ initUpdate = scene.world.createSystem(InitGLShaderSystem())
 ####################################################################################################
 ####################################################################################################
 ####################################################################################################
-
-model = util.translate(0.0,0.0,0.5)
-eye = util.vec(1.0, 1.0, 1.0)
-target = util.vec(0,0,0)
-up = util.vec(0.0, 1.0, 0.0)
-view = util.lookat(eye, target, up)
-
-
-projMat = util.ortho(-10.0, 10.0, -10.0, 10.0, -0.5, 10.0)
-
-mvpMat =  projMat @ view @ model
+################# 
+# ADD ENTITIES  #
+#################    
 
 ## ADD CUBE ##
 # attach a simple cube in a RenderMesh so that VertexArray can pick it up
-mesh4.vertex_attributes.append(vertexCube)
-mesh4.vertex_attributes.append(colorCube)
-mesh4.vertex_index.append(indexCube)
+a = Skinned_mesh("/Users/mlbeb/Desktop/boo/internship/py_code/pyECSSTree/pyECSS/examples/astroBoy_walk.dae","dae")
+
+
+mesh4.vertex_attributes.append(a.v)
+mesh4.vertex_attributes.append(a.colors)
+mesh4.vertex_index.append(a.f)
 vArray4 = scene.world.addComponent(node4, VertexArray())
-# decorated components and systems with sample, default pass-through shader with uniform MVP
 shaderDec4 = scene.world.addComponent(node4, ShaderGLDecorator(Shader(vertex_source = Shader.COLOR_VERT_MVP, fragment_source=Shader.COLOR_FRAG)))
-shaderDec4.setUniformVariable(key='modelViewProj', value=mvpMat, mat4=True)
 
 
-scene.world.print()
 
+## ADD AXES ##
+axes = scene.world.createEntity(Entity(name="axes"))
+scene.world.addEntityChild(rootEntity, axes)
+axes_trans = scene.world.addComponent(axes, VectorQuaternion_BasicTransformDecorator(name="axes_trans", q=quat))
+axes_mesh = scene.world.addComponent(axes, RenderMesh(name="axes_mesh"))
+axes_mesh.vertex_attributes.append(vertexAxes) 
+axes_mesh.vertex_attributes.append(colorAxes)
+axes_mesh.vertex_index.append(indexAxes)
+axes_vArray = scene.world.addComponent(axes, VertexArray(primitive=GL_LINES)) # note the primitive change
+axes_shader = scene.world.addComponent(axes, ShaderGLDecorator(Shader(vertex_source = Shader.COLOR_VERT_MVP, fragment_source=Shader.COLOR_FRAG)))
+
+
+# INITIATE SCENE#
+
+scene.init(imgui=True, windowWidth = 1024, windowHeight = 768, windowTitle = "pyglGA test_renderAxesTerrainEVENT")
+scene.world.traverse_visit(initUpdate, scene.world.root)
+
+################# 
+# EVENT MANAGER #
+#################
+
+eManager = scene.world.eventManager
+gWindow = scene.renderWindow
+gGUI = scene.gContext
+
+renderGLEventActuator = RenderGLStateSystem()
+eManager._subscribers['OnUpdateWireframe'] = gWindow
+eManager._actuators['OnUpdateWireframe'] = renderGLEventActuator
+eManager._subscribers['OnUpdateCamera'] = gWindow 
+eManager._actuators['OnUpdateCamera'] = renderGLEventActuator    
+
+
+
+
+
+# CAMERA SETTINGS #
+
+eye = util.vec(2.5, 2.5, 2.5)
+target = util.vec(0.0, 0.0, 0.0)
+up = util.vec(0.0, 1.0, 0.0)
+view = util.lookat(eye, target, up)
+# projMat = util.ortho(-10.0, 10.0, -10.0, 10.0, -1.0, 10.0) ## WORKING
+# projMat = util.perspective(90.0, 1.33, 0.1, 100) ## WORKING
+projMat = util.perspective(50.0, 1.0, 1.0, 10.0) ## WORKING 
+
+model_terrain_axes = util.translate(0.0,0.0,0.0)
+model_cube = util.scale(0.3) @ util.translate(0.0,0.5,0.0)
+
+gWindow._myCamera = view # otherwise, an imgui slider must be moved to properly update
+
+
+# MAIN RENDERING LOOP #
 
 running = True
-# MAIN RENDERING LOOP
-scene.init(imgui=True, windowWidth = 1024, windowHeight = 768, windowTitle = "pyglGA Cube Scene")
-
-# pre-pass scenegraph to initialise all GL context dependent geometry, shader classes
-# needs an active GL context
-scene.world.traverse_visit(initUpdate, scene.world.root)
 
 while running:
     running = scene.render(running)
     scene.world.traverse_visit(renderUpdate, scene.world.root)
+    view =  gWindow._myCamera # updates view via the imgui
+    mvp_cube = projMat @ view @ model_cube
+    mvp_terrain_axes = projMat @ view @ model_terrain_axes
+    axes_shader.setUniformVariable(key='modelViewProj', value=mvp_terrain_axes, mat4=True)
+    shaderDec4.setUniformVariable(key='modelViewProj', value=mvp_cube, mat4=True)
     scene.render_post()
     
 scene.shutdown()
@@ -168,4 +212,6 @@ scene.shutdown()
 
 ####################################################################################################
 ####################################################################################################
-####################################################################################################   
+####################################################################################################
+
+

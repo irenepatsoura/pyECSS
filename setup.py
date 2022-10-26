@@ -43,7 +43,7 @@ setup(
         "Operating System :: Microsoft :: Windows",
         "Operating System :: MacOS",
         "Operating System :: Unix",
-        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.7",
     ],
     project_urls={
         "Homepage" : "https://github.com/papagiannakis/pyECSS",
@@ -52,5 +52,5 @@ setup(
         "Source Code": "https://github.com/papagiannakis/pyECSS",
     },
 
-    python_requires=">=3.9,<3.10",
+    python_requires=">=3.7,<3.10",
 )

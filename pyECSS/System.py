@@ -134,6 +134,14 @@ class System(ABC):
         """
         pass
     
+    def applyCamera2BasicTransformDecorator(self, basicTransform: pyECSS.Component.BasicTransform, event = None):
+        """
+        method to be subclassed for  behavioral or logic computation 
+        when visits Components. 
+        
+        """
+        pass
+    
     def apply2Camera(self, basicTransform: pyECSS.Component.Camera, event = None):
         """
         method to be subclassed for  behavioral or logic computation 

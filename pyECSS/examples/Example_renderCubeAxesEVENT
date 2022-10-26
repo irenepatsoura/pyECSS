@@ -12,7 +12,7 @@ from pyECSS.System import System, TransformSystem, CameraSystem, RenderSystem
 from pyGLV.GL.Scene import Scene
 from pyECSS.ECSSManager import ECSSManager
 from pyGLV.GUI.Viewer import SDL2Window, ImGUIDecorator, RenderGLStateSystem
-from pyECSS.quaternion import Quaternion
+from quaternion import Quaternion
 
 from pyGLV.GL.Shader import InitGLShaderSystem, Shader, ShaderGLDecorator, RenderGLShaderSystem
 from pyGLV.GL.VertexArray import VertexArray

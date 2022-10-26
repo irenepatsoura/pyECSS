@@ -1,4 +1,4 @@
-from pyECSS.quaternion import Quaternion
+from pyECSS.examples.quaternion import Quaternion
 import numpy as np
 
 class Conversions():

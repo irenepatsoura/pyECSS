@@ -25,10 +25,10 @@ from typing             import List
 from collections.abc    import Iterable, Iterator
 from numbers import Number
 from pyECSS.dual_quaternion import DualQuaternion
-from pyECSS.quaternion import Quaternion
+from pyECSS.examples.quaternion import Quaternion
 from clifford.g3 import *  # import GA for 3D space
 from pyECSS.type_conversion_functs import Conversions
-
+import pyGLV
 import pyECSS.System
 import uuid  
 import pyECSS.utilities as util
@@ -728,9 +728,9 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         :param system: [a System object]
         :type system: [System]
         """
-        
-        system.apply2BasicTransformDecorator(self) #from TransformSystem
-        system.applyCamera2BasicTransformDecorator(self) #from CameraSystem
+        if(isinstance(system,pyECSS.System.TransformSystem) or isinstance(system,pyECSS.System.CameraSystem)):
+            system.apply2BasicTransformDecorator(self) #from TransformSystem
+            system.applyCamera2BasicTransformDecorator(self) #from CameraSystem
         """
         if (isinstance(system, System.TransformSystem)):
             system.apply(self)
