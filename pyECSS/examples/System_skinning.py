@@ -75,7 +75,7 @@ class System_skinning:
         print("TIME : ", end-start)
         print("TRANSFORMATION = ", False)
         
-        return self.print_animation(newv, v, f, b,model,mesh_id)
+        return newv
         
         # generate mesh (all above coode exept plot, returns a mesh to use by the ecss code in order ot print the animation)
         # color like Example_renderCube but for all vertices (.length())

@@ -8,7 +8,7 @@ from System_skinning import System_skinning
 
 
 class Skinned_mesh :
-    def __init__(self,filename=None, file_type=None):
+    def __init__(self,filename=None, file_type=None, animation=False):
         
         if (filename is None):
             self._filename = self.getClassName()
@@ -23,14 +23,13 @@ class Skinned_mesh :
         # print(filename, file_type)
         self.model = load(self._filename,self._file_type)
         self.mesh_id = 3
-        self.mesh = self.model.meshes[self.mesh_id]
-        self.v = self.mesh.vertices
+        self.mesh = self.model.meshes[self.mesh_id]   
         print(self.mesh.faces)
         # print(self.v)
         self.f = self.mesh.faces
         self.b = self.mesh.bones
         color_list = []
-        for i in range(len(self.v)):
+        for i in range(len(self.mesh.vertices)):
             p = np.array([1.0, 0.0, 0.0])
             # print(p)
             color_list.append(p)
@@ -39,6 +38,13 @@ class Skinned_mesh :
         self.model.meshes[self.mesh_id] = self.mesh
         self.colors = color_array
         
+        if not (animation):
+            self.v = self.mesh.vertices
+        else:
+            temp = System_skinning()
+            newv = temp.generate_mesh(self.mesh.vertices, self.f, self.b, self.model, self.mesh_id)
+            self.v = newv
+            
         
         
         

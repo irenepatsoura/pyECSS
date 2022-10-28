@@ -131,7 +131,7 @@ initUpdate = scene.world.createSystem(InitGLShaderSystem())
 
 ## ADD CUBE ##
 # attach a simple cube in a RenderMesh so that VertexArray can pick it up
-a = Skinned_mesh("/Users/mlbeb/Desktop/boo/internship/py_code/pyECSSTree/pyECSS/examples/astroBoy_walk.dae","dae")
+a = Skinned_mesh("/Users/mlbeb/Desktop/boo/internship/py_code/pyECSSTree/pyECSS/examples/astroBoy_walk.dae","dae",True)
 
 
 mesh4.vertex_attributes.append(a.v)
