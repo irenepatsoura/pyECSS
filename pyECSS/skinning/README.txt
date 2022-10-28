@@ -1,0 +1,2 @@
+For printing the desired model you run the skinning_test_main.py file.
+Make sure, when you create a Skinned Mesh object, that you have changed the filename to the one that corresponds to the desirable animation file path fromn your machine.

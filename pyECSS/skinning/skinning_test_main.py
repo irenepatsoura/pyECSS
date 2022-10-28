@@ -52,68 +52,6 @@ scene.world.addEntityChild(rootEntity, axes)
 axes_trans = scene.world.addComponent(axes, VectorQuaternion_BasicTransformDecorator(name="axes_trans", q=quat))
 axes_mesh = scene.world.addComponent(axes, RenderMesh(name="axes_mesh"))
 
-# a simple triangle
-vertexData = np.array([
-    [0.0, 0.0, 0.0, 1.0],
-    [0.5, 1.0, 0.0, 1.0],
-    [1.0, 0.0, 0.0, 1.0]
-],dtype=np.float32) 
-colorVertexData = np.array([
-    [1.0, 0.0, 0.0, 0.0],
-    [0.0, 1.0, 0.0, 1.0],
-    [0.0, 0.0, 1.0, 1.0]
-], dtype=np.float32)
-
-#Colored Axes
-vertexAxes = np.array([
-    [0.0, 0.0, 0.0, 1.0],
-    [1.0, 0.0, 0.0, 1.0],
-    [0.0, 0.0, 0.0, 1.0],
-    [0.0, 1.0, 0.0, 1.0],
-    [0.0, 0.0, 0.0, 1.0],
-    [0.0, 0.0, 1.0, 1.0]
-],dtype=np.float32) 
-colorAxes = np.array([
-    [1.0, 0.0, 0.0, 1.0],
-    [1.0, 0.0, 0.0, 1.0],
-    [0.0, 1.0, 0.0, 1.0],
-    [0.0, 1.0, 0.0, 1.0],
-    [0.0, 0.0, 1.0, 1.0],
-    [0.0, 0.0, 1.0, 1.0]
-], dtype=np.float32)
-
-#Simple Cube
-vertexCube = np.array([
-    [-0.5, -0.5, 0.5, 1.0],
-    [-0.5, 0.5, 0.5, 1.0],
-    [0.5, 0.5, 0.5, 1.0],
-    [0.5, -0.5, 0.5, 1.0], 
-    [-0.5, -0.5, -0.5, 1.0], 
-    [-0.5, 0.5, -0.5, 1.0], 
-    [0.5, 0.5, -0.5, 1.0], 
-    [0.5, -0.5, -0.5, 1.0]
-],dtype=np.float32) 
-colorCube = np.array([
-    [0.0, 0.0, 0.0, 1.0],
-    [1.0, 0.0, 0.0, 1.0],
-    [1.0, 1.0, 0.0, 1.0],
-    [0.0, 1.0, 0.0, 1.0],
-    [0.0, 0.0, 1.0, 1.0],
-    [1.0, 0.0, 1.0, 1.0],
-    [1.0, 1.0, 1.0, 1.0],
-    [0.0, 1.0, 1.0, 1.0]
-], dtype=np.float32)
-
-#index arrays for above vertex Arrays
-index = np.array((0,1,2), np.uint32) #simple triangle
-indexAxes = np.array((0,1,2,3,4,5), np.uint32) #3 simple colored Axes as R,G,B lines
-indexCube = np.array((1,0,3, 1,3,2, 
-                    2,3,7, 2,7,6,
-                    3,0,4, 3,4,7,
-                    6,5,1, 6,1,2,
-                    4,5,6, 4,6,7,
-                    5,4,0, 5,0,1), np.uint32) #rhombus out of two triangles
-
 
 
 # Systems
@@ -129,9 +67,11 @@ initUpdate = scene.world.createSystem(InitGLShaderSystem())
 # ADD ENTITIES  #
 #################    
 
-## ADD CUBE ##
-# attach a simple cube in a RenderMesh so that VertexArray can pick it up
+## ADD SKINNED MESH ##
+# attach a simple skinned mesh in a RenderMesh so that VertexArray can pick it up
+# make sure you have changed the filename to the one that corresponds to your file path
 a = Skinned_mesh("/Users/mlbeb/Desktop/boo/internship/py_code/pyECSSTree/pyECSS/examples/astroBoy_walk.dae","dae",True)
+
 
 
 mesh4.vertex_attributes.append(a.v)
@@ -147,9 +87,6 @@ axes = scene.world.createEntity(Entity(name="axes"))
 scene.world.addEntityChild(rootEntity, axes)
 axes_trans = scene.world.addComponent(axes, VectorQuaternion_BasicTransformDecorator(name="axes_trans", q=quat))
 axes_mesh = scene.world.addComponent(axes, RenderMesh(name="axes_mesh"))
-axes_mesh.vertex_attributes.append(vertexAxes) 
-axes_mesh.vertex_attributes.append(colorAxes)
-axes_mesh.vertex_index.append(indexAxes)
 axes_vArray = scene.world.addComponent(axes, VertexArray(primitive=GL_LINES)) # note the primitive change
 axes_shader = scene.world.addComponent(axes, ShaderGLDecorator(Shader(vertex_source = Shader.COLOR_VERT_MVP, fragment_source=Shader.COLOR_FRAG)))
 
