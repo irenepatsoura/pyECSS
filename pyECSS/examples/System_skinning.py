@@ -1,5 +1,5 @@
 from operator import mod
-from gate_module import *
+from pyECSS.examples.gate_module import *
 import time
 
 class System_skinning:
@@ -22,38 +22,13 @@ class System_skinning:
         for child in node.children:
             read_tree_names(MM,M,child,p,bone_names,False) 
      
-    def print_animation(self, newv, v, f, b,model,meshid):
+    def print_animation(self, newv, f, model,meshid):
         print("col:",model.meshes[meshid].colors.shape)
         mp.plot(newv, f,c = model.meshes[meshid].colors,shading={"scale": 2.5,"wireframe":True},return_plot=True)
         
-    # def print_animation(self,v, f, b, model, mesh_id) :         
         
-    #     # print(v) 
-    #     M = initialize_M(b)
-    #     M[1] = np.dot(np.diag([2,2,2,1]),M[1])
-        
-    #     vw = vertex_weight(len(v))
-    #     vw.populate(b)
-        
-    #     MM = read_tree(model,mesh_id,M,False)
-    #     BB = [b[i].offsetmatrix for i in range(len(b))]
-    #     newv = np.zeros([(len(v)),3])
-    #     start = time.time()
-    #     for i in range(len(v)):
-    #         for j in range(4):
-    #             if vw.id[i][j] >=0:
-                 
-    #                 mat = np.dot(MM[vw.id[i][j]],BB[vw.id[i][j]]) 
-    #                 # mat =    BB[vw.id[i][j]]        
-    #                 newv[i] = newv[i] + vw.weight[i][j]*(vertex_apply_M(v[i],mat))
-    #     end = time.time()
-    #     print("TIME : ", end-start)
-    #     print("TRANSFORMATION = ", False)
-    #     p = mp.plot(newv, f,newv[:, 1],shading={"scale": 2.5,"wireframe":True},return_plot=True)        
-    #     # p.save(“skinning.html”)
-        
-    def generate_mesh(self,v, f, b, model, mesh_id):
-        print("pipi")
+    def generate_mesh(self,v, b, model, mesh_id):
+        # print("pipi")
         M = initialize_M(b)
         M[1] = np.dot(np.diag([2,2,2,1]),M[1])
         
@@ -68,8 +43,7 @@ class System_skinning:
             for j in range(4):
                 if vw.id[i][j] >=0:
                  
-                    mat = np.dot(MM[vw.id[i][j]],BB[vw.id[i][j]]) 
-                    # mat =    BB[vw.id[i][j]]        
+                    mat = np.dot(MM[vw.id[i][j]],BB[vw.id[i][j]])        
                     newv[i] = newv[i] + vw.weight[i][j]*(vertex_apply_M(v[i],mat))
         end = time.time()
         print("TIME : ", end-start)
@@ -77,5 +51,3 @@ class System_skinning:
         
         return newv
         
-        # generate mesh (all above coode exept plot, returns a mesh to use by the ecss code in order ot print the animation)
-        # color like Example_renderCube but for all vertices (.length())

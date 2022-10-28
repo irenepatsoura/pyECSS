@@ -1,8 +1,8 @@
 
 from re import M
-from gate_module import *
+from pyECSS.examples.gate_module import *
 import time
-from System_skinning import System_skinning
+from pyECSS.examples.System_skinning import System_skinning
 
 
 
@@ -22,12 +22,18 @@ class Skinned_mesh :
         
         # print(filename, file_type)
         self.model = load(self._filename,self._file_type)
+        if(self.model==None): 
+          return None  
         self.mesh_id = 3
         self.mesh = self.model.meshes[self.mesh_id]   
         print(self.mesh.faces)
         # print(self.v)
         self.f = self.mesh.faces
+        if(len(self.f)==0):
+            return None
         self.b = self.mesh.bones
+        if(len(self.b)==0):
+            return None 
         color_list = []
         for i in range(len(self.mesh.vertices)):
             p = np.array([1.0, 0.0, 0.0])
@@ -42,21 +48,11 @@ class Skinned_mesh :
             self.v = self.mesh.vertices
         else:
             temp = System_skinning()
-            newv = temp.generate_mesh(self.mesh.vertices, self.f, self.b, self.model, self.mesh_id)
+            newv = temp.generate_mesh(self.mesh.vertices, self.b, self.model, self.mesh_id)
             self.v = newv
             
+        if(len(self.v)==0):
+            return None   
         
-        
-        
-        # print(np.array(np.array([5,100,200])))
-        # self.mesh.colors = len(self.mesh.vertices)*4
-        
-        # print("List:", my_list )
-        # print("CS:",str(len(self.mesh.colors)))
-        
-        
-# if __name__ == "__main__":
-   
-#     a = Skinned_mesh(filename='/Users/mlbeb/Desktop/boo/internship/py_code/pyECSSTree/pyECSS/examples/astroBoy_walk.dae',file_type='dae')
-#     b = System_skinning(a.b, a.v, a.f)
+
     
