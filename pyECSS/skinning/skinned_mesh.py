@@ -1,8 +1,8 @@
 
 from re import M
-from pyECSS.examples.gate_module import *
+from pyECSS.skinning.gate_module import *
 import time
-from pyECSS.examples.System_skinning import System_skinning
+from pyECSS.skinning.System_skinning import System_skinning
 
 
 

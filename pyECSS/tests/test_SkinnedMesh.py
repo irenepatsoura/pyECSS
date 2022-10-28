@@ -1,8 +1,8 @@
 import unittest
 
-from pyECSS.examples.System_skinning import System_skinning
-from pyECSS.examples.skinned_mesh import Skinned_mesh
-from pyECSS.examples.gate_module import *
+from pyECSS.skinning.System_skinning import System_skinning
+from pyECSS.skinning.skinned_mesh import Skinned_mesh
+from pyECSS.skinning.gate_module import *
 import os.path
 
 class TestComponent(unittest.TestCase):

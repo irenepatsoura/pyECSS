@@ -1,5 +1,5 @@
 from operator import mod
-from pyECSS.examples.gate_module import *
+from pyECSS.skinning.gate_module import *
 import time
 
 class System_skinning:
