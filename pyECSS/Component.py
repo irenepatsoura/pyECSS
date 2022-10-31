@@ -547,7 +547,7 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         
         if not (q is None or vec is None):
             buf = q.to_transformation_matrix()
-            print("buffer is ",buf)
+            # print("buffer is ",buf)
             for i in range(3):
                 buf[i,3] = vec[i]  
             self._trs = buf
@@ -599,6 +599,7 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         return self.trs[:3,3];
     
     def translate_vector(self, tr_v):
+        """ Translate Component by the the given (translation) vector """
         coor = self.translation_vec
         new_x = tr_v[0] + coor[0]
         new_y = tr_v[1] + coor[1]
@@ -738,13 +739,4 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
         if (isinstance(system, System.CameraSystem)):
             system.applyCamera(self)
         """
-        
-# if __name__ == "__main__":
-#     a = VectorQuaternion_BasicTransformDecorator()
-#     print (" we want to translate the point (5,3,2) by t = (2,3,14) ")    
-#     print( 'translated point: ', a.translate_dual_quaternion(5,3,2,2,3,14) )
-#     O = 5*e1 # our object: the point (5,0,0)
-#     print ('Original Point-Object = ', O)
-#     print( 'Rotated Point-object = ', a.rotate_multivector(O,2*math.pi/3)) # the rotated object, ie, the point (0,5,0)
-
     

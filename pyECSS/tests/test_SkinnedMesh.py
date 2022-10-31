@@ -14,21 +14,28 @@ class TestComponent(unittest.TestCase):
 
        
     def test_file_exists(self):
+        print("TestComponent:test_file_exists() START")
         assert(os.path.exists('/Users/mlbeb/Desktop/boo/internship/py_code/pyECSSTree/pyECSS/examples/')==True)
         
-    print("TestComponent:test_animation() START")    
+        print("TestComponent:test__file_exists() END")
+        
+        
      
     def test_animation(self):
+        print("TestComponent:test_animation() START")
         a = self.skinnedMeshComponent
         self.assertNotEqual(a, None)
     
-    print("TestComponent:test_animation() END")
+        print("TestComponent:test_animation() END")
 
         
     def test_vertices(self):
+        print("TestComponent:test_vertices() START")
         a = self.skinnedMeshComponent
         for i in range(len(a.v)):
             assert(len(a.v[i])==3)
+        
+        print("TestComponent:test_vertices() END")
 
          
         
