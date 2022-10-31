@@ -666,7 +666,26 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
     def accept(self, system: pyECSS.System, event = None):
         pass # we want the decorator first to accept the visitor and only if needed the wrappe to accept it too
         #self._component.accept(system)
-        
+
+
+class BasicTransformDecorator(ComponentDecorator):
+    """An example of a concrete Component Decorator that wraps the component (BasicTransform) 
+        and adds extra layered functionality 
+
+    :param ComponentDecorator: [description]
+    :type ComponentDecorator: [type]
+    """
+    def init(self):
+        """
+        example of a decorator
+        """
+        self.component.init()
+        #call any extra methods before or after
+    
+    def accept(self, system: pyECSS.System, event = None):
+        pass # we want the decorator first to accept the visitor and only if needed the wrappe to accept it too
+        #self._component.accept(system)
+ 
 # if __name__ == "__main__":
 #     a = VectorQuaternion_BasicTransformDecorator()
 #     print (" we want to translate the point (5,3,2) by t = (2,3,14) ")    
@@ -675,4 +694,3 @@ class VectorQuaternion_BasicTransformDecorator(ComponentDecorator):
 #     print ('Original Point-Object = ', O)
 #     print( 'Rotated Point-object = ', a.rotate_multivector(O,2*math.pi/3)) # the rotated object, ie, the point (0,5,0)
 
-    
