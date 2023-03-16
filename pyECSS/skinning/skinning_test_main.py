@@ -1,20 +1,24 @@
+import sys
+sys.path.append('/Users/mlbeb/Desktop/boo/internship/py_code/pyECSSTree/pyECSS')
 from System_skinning import System_skinning
 from skinned_mesh import Skinned_mesh
 from statistics import mode
 from turtle import width
 import unittest
+import random
 
 import numpy as np
 # from sympy import true
 
-import pyECSS.utilities as util
-from pyECSS.Entity import Entity
-from pyECSS.Component import VectorQuaternion_BasicTransformDecorator, Camera, RenderMesh
-from pyECSS.System import System, TransformSystem, CameraSystem, RenderSystem
+import utilities as util
+from Entity import Entity
+from Component import VectorQuaternion_BasicTransformDecorator, Camera, RenderMesh
+from System import System, TransformSystem, CameraSystem, RenderSystem
 from pyGLV.GL.Scene import Scene
-from pyECSS.ECSSManager import ECSSManager
+from ECSSManager import ECSSManager
 from pyGLV.GUI.Viewer import SDL2Window, ImGUIDecorator, RenderGLStateSystem
-from pyECSS.examples.quaternion import Quaternion
+sys.path.append('/Users/mlbeb/Desktop/boo/internship/py_code/pyECSSTree/pyECSS/examples')
+from quaternion import Quaternion
 
 from pyGLV.GL.Shader import InitGLShaderSystem, Shader, ShaderGLDecorator, RenderGLShaderSystem
 from pyGLV.GL.VertexArray import VertexArray
@@ -46,6 +50,10 @@ scene.world.addEntityChild(rootEntity, node4)
 trans4 = scene.world.addComponent(node4, VectorQuaternion_BasicTransformDecorator(name="trans4", q=quat))
 mesh4 = scene.world.addComponent(node4, RenderMesh(name="mesh4"))
 
+node5 = scene.world.createEntity(Entity(name="node5"))
+scene.world.addEntityChild(rootEntity, node5)
+trans5 = scene.world.addComponent(node5, VectorQuaternion_BasicTransformDecorator(name="trans5", q=quat))
+mesh5 = scene.world.addComponent(node5, RenderMesh(name="mesh5"))
 
 axes = scene.world.createEntity(Entity(name="axes"))
 scene.world.addEntityChild(rootEntity, axes)
@@ -67,19 +75,33 @@ initUpdate = scene.world.createSystem(InitGLShaderSystem())
 # ADD ENTITIES  #
 #################    
 
-## ADD SKINNED MESH ##
+## ADD FIRST SKINNED MESH ##
 # attach a simple skinned mesh in a RenderMesh so that VertexArray can pick it up
 # make sure you have changed the filename to the one that corresponds to your file path
-a = Skinned_mesh("/Users/mlbeb/Desktop/boo/internship/py_code/pyECSSTree/pyECSS/examples/astroBoy_walk.dae","dae",True)
+a = Skinned_mesh(2,"/Users/mlbeb/Desktop/boo/internship/py_code/pyECSSTree/pyECSS/examples/astroBoy_walk.dae","dae",True)
+# a = Skinned_mesh(0,"/Users/mlbeb/Desktop/boo/internship/py_code/pyECSSTree/pyECSS/examples/cube.dae","dae",False)
+# a.coloringvert()
 
 
-
-mesh4.vertex_attributes.append(a.v)
+mesh4.vertex_attributes.append(a.oldv)
 mesh4.vertex_attributes.append(a.colors)
 mesh4.vertex_index.append(a.f)
 vArray4 = scene.world.addComponent(node4, VertexArray())
 shaderDec4 = scene.world.addComponent(node4, ShaderGLDecorator(Shader(vertex_source = Shader.COLOR_VERT_MVP, fragment_source=Shader.COLOR_FRAG)))
 
+
+## ADD SECOND SKINNED MESH ##
+# attach a simple skinned mesh in a RenderMesh so that VertexArray can pick it up
+# make sure you have changed the filename to the one that corresponds to your file path
+b = Skinned_mesh(3,"/Users/mlbeb/Desktop/boo/internship/py_code/pyECSSTree/pyECSS/examples/astroBoy_walk.dae","dae",True)
+b.coloringvert()
+
+
+mesh5.vertex_attributes.append(b.oldv)
+mesh5.vertex_attributes.append(b.colors)
+mesh5.vertex_index.append(b.f)
+vArray5 = scene.world.addComponent(node5, VertexArray())
+shaderDec5 = scene.world.addComponent(node5, ShaderGLDecorator(Shader(vertex_source = Shader.COLOR_VERT_MVP, fragment_source=Shader.COLOR_FRAG)))
 
 
 ## ADD AXES ##
@@ -108,7 +130,11 @@ renderGLEventActuator = RenderGLStateSystem()
 eManager._subscribers['OnUpdateWireframe'] = gWindow
 eManager._actuators['OnUpdateWireframe'] = renderGLEventActuator
 eManager._subscribers['OnUpdateCamera'] = gWindow 
-eManager._actuators['OnUpdateCamera'] = renderGLEventActuator    
+eManager._actuators['OnUpdateCamera'] = renderGLEventActuator  
+eManager._subscribers['OnUpdateFrames'] = gWindow   
+eManager._actuators['OnUpdateFrames'] = renderGLEventActuator 
+eManager._subscribers['OnUpdatePlayButton'] = gWindow   
+eManager._actuators['OnUpdatePlayButton'] = renderGLEventActuator    
 
 
 
@@ -135,6 +161,26 @@ gWindow._myCamera = view # otherwise, an imgui slider must be moved to properly 
 running = True
 
 while running:
+    a.updateFrames(gWindow._myFrames)
+    b.updateFrames(gWindow._myFrames)
+    
+    if(gWindow._playMode):
+        pp = mesh4.vertex_attributes
+        print(mesh4.vertex_attributes[0])
+        pp[0] = a.applystep(mesh4.vertex_attributes[0]) 
+        vArray4.__del__()
+        vArray4.attributes = pp
+        vArray4.init()
+        mesh4.vertex_attributes = pp
+        
+        pp = mesh5.vertex_attributes
+        print(mesh5.vertex_attributes[0])
+        pp[0] = b.applystep(mesh5.vertex_attributes[0]) 
+        vArray5.__del__()
+        vArray5.attributes = pp
+        vArray5.init()
+        mesh5.vertex_attributes = pp
+    
     running = scene.render(running)
     scene.world.traverse_visit(renderUpdate, scene.world.root)
     view =  gWindow._myCamera # updates view via the imgui
@@ -142,6 +188,7 @@ while running:
     mvp_terrain_axes = projMat @ view @ model_terrain_axes
     axes_shader.setUniformVariable(key='modelViewProj', value=mvp_terrain_axes, mat4=True)
     shaderDec4.setUniformVariable(key='modelViewProj', value=mvp_cube, mat4=True)
+    # shaderDec5.setUniformVariable(key='modelViewProj', value=mvp_cube, mat4=True)
     scene.render_post()
     
 scene.shutdown()
